@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小狸日語 · 職人中控台 v13.0</title>
+<link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
+<link rel="manifest" href="./site.webmanifest">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=Shippori+Mincho:wght@400;700;800&family=Zen+Kaku+Gothic+New:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --kori-bg: #FAF7F2; --kori-text: #1A1410; --kori-gold: #C9A84C;
+            --theme-sakura: #E597B2; --theme-matcha: #4A7C6E;
+            --theme-hydrangea: #5D78AB; --theme-shu: #B5351A;
+            --night: #1A1410; --blue: #B5351A; --card-ex-size: 24px;
+            --topbar-h: 70px; --sidebar-w: 420px;
+        }
+
+        body, html { margin: 0; padding: 0; height: 100%; font-family: "Zen Kaku Gothic New", sans-serif; background: #F5F0E8; overflow: hidden; }
+
+        /* ══ 原生 RUBY ══ */
+        ruby { ruby-position: over; }
+        rt { font-size: 0.42em; font-weight: 900; color: var(--kori-primary); font-family: "Zen Kaku Gothic New", sans-serif; letter-spacing: 0; }
+
+        /* ══ TOPBAR ══ */
+        .topbar { height: var(--topbar-h); background: var(--night); color: white; display: flex; align-items: center; padding: 0 20px; gap: 10px; border-bottom: 2px solid var(--blue); z-index: 1000; position: relative; flex-wrap: nowrap; overflow: hidden; }
+        .brand { font-family: "Shippori Mincho", serif; font-weight: 800; font-size: 14px; white-space: nowrap; }
+        .api-zone { display: flex; align-items: center; gap: 6px; background: #222; padding: 5px 10px; border-radius: 6px; flex-shrink: 0; }
+        .api-input { background: transparent; border: none; color: #6EE7B7; font-size: 11px; width: 140px; outline: none; font-family: monospace; }
+        .api-saved-dot { width: 7px; height: 7px; border-radius: 50%; background: #6EE7B7; flex-shrink: 0; display: none; }
+
+        .ext-group { display: flex; gap: 8px; margin: 0 10px; border-right: 1px solid #444; padding-right: 10px; flex-shrink: 0; }
+        .ext-link { color: #ccc; text-decoration: none; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: 4px; background: #333; white-space: nowrap; }
+        .ext-link:hover { background: #444; color: white; }
+
+        .ctrl-group { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); padding: 5px 12px; border-radius: 20px; flex-shrink: 0; }
+        .sound-toggle { display: flex; align-items: center; gap: 8px; font-size: 11px; cursor: pointer; color: #9A8E83; white-space: nowrap; user-select: none; }
+        .toggle-switch { width: 30px; height: 16px; background: #444; border-radius: 8px; position: relative; transition: 0.3s; flex-shrink: 0; }
+        .toggle-switch::after { content: ""; position: absolute; width: 12px; height: 12px; background: white; border-radius: 50%; top: 2px; left: 2px; transition: 0.3s; }
+        .sound-active .toggle-switch { background: var(--blue); }
+        .sound-active .toggle-switch::after { left: 16px; }
+
+        /* ══ IG CARD ══ */
+        .ig-card { width: 380px; height: 380px; position: relative; overflow: hidden; display: flex; flex-direction: column; font-family: "Shippori Mincho", serif; background: var(--kori-card-bg, #FAF7F2); transition: background 0.4s; flex-shrink: 0; }
+        .ig-card::after { content: ""; position: absolute; inset: 12px; border: 1px solid var(--kori-gold); opacity: 0.3; pointer-events: none; }
+        .card-pattern { position: absolute; inset: 0; z-index: 1; pointer-events: none; background-color: transparent; }
+        .card-header { padding: 22px 25px 5px; display: flex; justify-content: space-between; z-index: 10; position: relative; }
+        .header-badge { background: var(--kori-primary); color: white; font-size: 11px; padding: 4px 12px; box-shadow: 2px 2px 0 var(--kori-gold); }
+        .cover-body { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 0 35px; z-index: 10; text-align: center; position: relative; }
+        .cover-desc { font-size: 18px; color: var(--kori-primary); font-weight: 700; background: white; padding: 6px 20px; border: 1px solid var(--kori-primary); border-radius: 4px; }
+        .example-box { background: rgba(255,255,255,0.8); padding: 18px; border-left: 6px solid var(--kori-primary); text-align: left; width: 100%; box-sizing: border-box; }
+        ruby { ruby-position: over; }
+        ruby rt { font-size: 14px; font-weight: 700; color: var(--kori-primary, #B5351A); letter-spacing: 0.02em; font-family: "Zen Kaku Gothic New", sans-serif; }
+        .cover-title ruby rt { font-size: 20px; }
+        .rt-sized ruby rt { font-size: var(--rt-px, 14px); }
+        .cover-title { font-size: 44px; color: var(--kori-card-text, #1A1410); font-weight: 900; margin-bottom: 15px; line-height: 2.2; }
+        /* ══ THEME ══ */
+        body.theme-sakura    { --kori-primary:#C0607A; --kori-card-bg:#FDF0F4; --kori-card-text:#2A1018; --kori-gold:#D4A0B0; }
+        body.theme-matcha    { --kori-primary:#3A7055; --kori-card-bg:#EEF8F2; --kori-card-text:#0F2218; --kori-gold:#8AC4A0; }
+        body.theme-hydrangea { --kori-primary:#4860A8; --kori-card-bg:#EFF2FF; --kori-card-text:#10183A; --kori-gold:#9AAADE; }
+        body.theme-shu       { --kori-primary:#B5351A; --kori-card-bg:#FAF7F2; --kori-card-text:#1A1410; --kori-gold:#C9A84C; }
+
+        /* ══ LAYOUT ══ */
+        .app-container { display: flex; height: calc(100vh - var(--topbar-h)); }
+        .left-col { flex: 1; overflow-y: auto; padding: 30px; display: flex; flex-direction: column; align-items: center; gap: 30px; scroll-behavior: smooth; transition: 0.4s ease; }
+        .left-col.collapsed { flex: 0 0 0; padding: 0; opacity: 0; pointer-events: none; overflow: hidden; }
+        .right-col { width: var(--sidebar-w); background: #1E2F50; border-left: 2px solid var(--blue); display: flex; flex-direction: column; position: relative; transition: 0.4s ease; flex-shrink: 0; }
+        .collapse-handle { position: absolute; left: -12px; top: 50%; transform: translateY(-50%); width: 24px; height: 50px; background: var(--blue); color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100; border-radius: 5px 0 0 5px; }
+
+        /* ══ SNS SIDEBAR ══ */
+        .sidebar-inner { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 12px; color: white; overflow: hidden; }
+        .sidebar-toolbar { display: flex; gap: 5px; flex-wrap: wrap; }
+        .tb-btn { background: rgba(255,255,255,0.1); color: #93C5FD; border: 1px solid rgba(255,255,255,0.15); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 700; font-family: inherit; transition: all .15s; }
+        .tb-btn:hover { background: rgba(255,255,255,0.2); color: white; }
+        #sideInput { flex: 1; background: #0B1120; color: white; padding: 15px; border-radius: 10px; border: 1px solid #3B82F6; resize: none; outline: none; font-size: 15px; line-height: 1.8; font-family: "Zen Kaku Gothic New", sans-serif; min-height: 0; }
+
+        /* ══ FULLSCREEN EDITOR ══ */
+        #fsEditorOverlay { position: fixed; inset: 0; background: #F0F5FF; z-index: 2000; display: none; flex-direction: column; align-items: stretch; padding: 0; overflow: hidden; }
+        .fs-card { flex: 1; display: flex; flex-direction: column; background: white; overflow: hidden; }
+        .fs-header { padding: 20px 30px; border-bottom: 1.5px solid #DBEAFE; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+        .fs-body { padding: 16px 30px 20px; display: flex; flex-direction: column; gap: 10px; flex: 1; overflow: hidden; }
+        .fs-toolbar { display: flex; gap: 6px; flex-wrap: wrap; }
+        .fs-tb-btn { background: #F4F7FF; color: #2563EB; border: 1px solid #DBEAFE; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 700; font-family: inherit; transition: all .15s; }
+        .fs-tb-btn:hover { background: #DBEAFE; }
+        #fsInput { width: 100%; flex: 1; min-height: 0; padding: 18px; border: 2px solid #DBEAFE; border-radius: 16px; font-size: 17px; line-height: 1.9; resize: none; outline: none; font-family: "Zen Kaku Gothic New", sans-serif; box-sizing: border-box; transition: border-color .2s; }
+        #fsInput:focus { border-color: #3B82F6; }
+        .fs-char-counter { font-size: 12px; color: #9CA3AF; text-align: right; }
+        .fs-char-counter.warn { color: #F59E0B; }
+        .fs-char-counter.over { color: #EF4444; }
+
+        /* ══ AI PROGRESS ══ */
+        .ai-progress-bar { height: 4px; background: #ddd; border-radius: 99px; overflow: hidden; display: none; }
+        .ai-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #B5351A, #E57348); border-radius: 99px; transition: width .5s ease; }
+
+        /* ══ TOAST ══ */
+        #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1A1410; color: white; padding: 10px 22px; border-radius: 99px; font-size: 13px; font-weight: 700; opacity: 0; pointer-events: none; transition: all .3s; z-index: 9999; border: 1px solid var(--blue); white-space: nowrap; }
+        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* ══ EMOJI ══ */
+        .emoji-panel { background: #0B1120; border: 1px solid #3B82F6; border-radius: 8px; padding: 8px; display: none; flex-wrap: wrap; gap: 2px; flex-shrink: 0; }
+        .emoji-panel.open { display: flex; }
+        .e-btn { font-size: 18px; background: none; border: none; cursor: pointer; padding: 3px 5px; border-radius: 4px; transition: background .15s; line-height: 1; }
+        .e-btn:hover { background: rgba(255,255,255,.15); transform: scale(1.2); }
+        .fs-emoji-panel { background: #F4F7FF; border: 1px solid #DBEAFE; border-radius: 8px; padding: 8px; display: none; flex-wrap: wrap; gap: 2px; flex-shrink: 0; max-height: 100px; overflow-y: auto; }
+        .fs-emoji-panel.open { display: flex; }
+        .fs-e-btn { font-size: 20px; background: none; border: none; cursor: pointer; padding: 3px 5px; border-radius: 4px; transition: background .15s; line-height: 1; }
+        .fs-e-btn:hover { background: #DBEAFE; transform: scale(1.15); }
+
+        /* ══ MISC ══ */
+        .btn-primary { background: var(--blue); color: white; padding: 10px 20px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; font-family: inherit; transition: all .18s; }
+        .btn-primary:hover { filter: brightness(1.1); }
+        .btn-primary:active { transform: scale(.97); }
+        #offscreen-render-zone { position: fixed; top: -9999px; left: -9999px; z-index: -999; pointer-events: none; }
+
+        /* ══ PATTERN PICKER ══ */
+        .pat-picker { display:flex; gap:5px; align-items:center; flex-shrink:0; }
+        .pat-swatch { width:24px; height:24px; border-radius:4px; border:2px solid transparent; cursor:pointer; overflow:hidden; flex-shrink:0; transition:all .2s; }
+        .pat-swatch.active { border-color:#fff; transform:scale(1.2); }
+        .pat-swatch:hover { border-color:rgba(255,255,255,.6); }
+
+        /* ══ CARD EDITOR OVERLAY ══ */
+        #cardEditorOverlay { position:fixed; inset:0; background:rgba(10,10,20,.75); z-index:3000; display:none; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
+        #cardEditorOverlay.open { display:flex; }
+        .ce-modal { width:min(960px,96vw); max-height:90vh; background:#FAFAFA; border-radius:20px; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 32px 80px rgba(0,0,0,.4); }
+        .ce-topbar { background:#1A1410; color:white; padding:14px 22px; display:flex; align-items:center; gap:14px; flex-shrink:0; }
+        .ce-title { font-family:"Shippori Mincho",serif; font-size:16px; font-weight:800; letter-spacing:.08em; flex:1; }
+        .ce-tabs { display:flex; gap:2px; background:#111; border-radius:8px; padding:3px; flex-shrink:0; }
+        .ce-tab { padding:6px 14px; border-radius:6px; cursor:pointer; font-size:12px; font-weight:700; color:#9A8E83; border:none; background:none; font-family:inherit; transition:all .18s; white-space:nowrap; }
+        .ce-tab.active { background:var(--ce-accent,#B5351A); color:white; }
+        .ce-body { display:flex; flex:1; min-height:0; overflow:hidden; }
+        .ce-preview-col { width:390px; flex-shrink:0; background:#E8E4DC; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:20px; }
+        .ce-preview-label { font-size:11px; color:#666; font-weight:700; letter-spacing:.1em; }
+        .ce-edit-col { flex:1; overflow-y:auto; padding:20px 24px; display:flex; flex-direction:column; gap:14px; }
+        .ce-field { display:flex; flex-direction:column; gap:5px; }
+        .ce-label { font-size:11px; font-weight:800; color:#666; letter-spacing:.06em; text-transform:uppercase; }
+        .ce-input { border:1.5px solid #DDD; border-radius:8px; padding:10px 12px; font-size:14px; font-family:inherit; outline:none; transition:border-color .18s; resize:none; line-height:1.7; }
+        .ce-input:focus { border-color:#B5351A; }
+        .ce-hint { font-size:10px; color:#9CA3AF; }
+        .ce-footer { padding:14px 22px; border-top:1px solid #E5E7EB; display:flex; gap:10px; justify-content:flex-end; background:#FAFAFA; flex-shrink:0; }
+    </style>
+</head>
+<body class="theme-shu">
+
+<header class="topbar">
+    <div class="brand">🐾 小狸日語 v13.0</div>
+
+    <div class="ext-group">
+        <a href="https://docs.google.com/spreadsheets/d/1Ym-ELnrYKV-MgYOJWDf1_TMYWH6Aw4ynsAYgbLxG4Ic/edit" target="_blank" class="ext-link"><i class="fas fa-table"></i> 煉金爐</a>
+        <a href="https://docs.google.com/document/d/1KThVRf13zDM7FYRPteOPijcB9_xp6WAUCDFy9ATuJsw/edit" target="_blank" class="ext-link"><i class="fas fa-file-alt"></i> 書稿</a>
+    </div>
+
+    <!-- ✅ FIX: API Key 欄位自動讀取儲存值，存為 kori_google_key -->
+    <div class="api-zone">
+        <div class="api-saved-dot" id="apiDot" title="Key 已儲存"></div>
+        <input type="password" id="apiKeyInput" class="api-input" placeholder="Google Gemini Key" autocomplete="off">
+        <button class="btn-primary" style="padding:3px 9px; font-size:10px;" onclick="saveApiKey()">儲存</button>
+    </div>
+
+    <div class="ctrl-group">
+        <div class="sound-toggle" onclick="toggleSound()" id="soundSwitch">📜 和紙 <div class="toggle-switch"></div></div>
+        <button class="btn-primary" style="background:var(--theme-matcha); font-size:12px;" onclick="rotateTheme()">🎨 換主題</button>
+        <div class="pat-picker" title="花紋" id="patPicker"></div>
+    </div>
+
+    <div style="flex:1; min-width:10px;"></div>
+
+    <span id="saveIndicator" style="font-size:11px;color:#6EE7B7;font-weight:700;white-space:nowrap;opacity:0;transition:opacity .5s;">✅ 已儲存</span>
+    <button class="btn-primary" style="white-space:nowrap;font-size:13px;background:#1D4ED8;" onclick="exportBackup()">📦 匯出備份</button>
+    <label class="btn-primary" style="white-space:nowrap;font-size:13px;background:#065F46;cursor:pointer;margin:0;">📂 還原備份<input type="file" accept=".json" onchange="importBackup(this)" style="display:none;"></label>
+    <button class="btn-primary" style="white-space:nowrap;font-size:13px;background:#2563EB;" onclick="openJsonModal()">📥 導入 JSON</button>
+    <button class="btn-primary" style="white-space:nowrap;font-size:13px;background:#7F1D1D;" onclick="hardReset()">🗑 重置</button>
+    <input type="text" id="alchemyTopic" style="background:#333; color:white; border:none; padding:8px 10px; border-radius:4px; width:110px; font-size:12px; font-family:inherit;" placeholder="主題方向（選填）" oninput="syncAlchemyTopic(this)">
+    <button class="btn-primary" style="white-space:nowrap; font-size:13px;" onclick="generateAlchemy()">⚡ 一鍵煉金</button>
+</header>
+
+<!-- ══ JSON 導入 Modal ══ -->
+<div id="jsonModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9000;align-items:center;justify-content:center;">
+    <div style="background:white;border-radius:16px;width:min(640px,92vw);padding:28px;display:flex;flex-direction:column;gap:16px;box-shadow:0 24px 60px rgba(0,0,0,.4);">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div style="font-size:18px;font-weight:900;color:#1A1410;">📥 貼上 28 天 JSON</div>
+            <button onclick="closeJsonModal()" style="background:#F1F5F9;border:none;border-radius:8px;padding:6px 14px;font-size:16px;cursor:pointer;font-weight:900;">✕</button>
+        </div>
+        <textarea id="jsonImportInput" style="width:100%;height:280px;font-family:monospace;font-size:12px;box-sizing:border-box;border:2px solid #2563EB;border-radius:10px;padding:14px;resize:vertical;outline:none;line-height:1.7;" placeholder='貼上 AI 產生的 JSON 陣列：
+
+[
+  {
+    "d": 1,
+    "word_ruby": "<ruby>気<rt>き</rt></ruby>まずい",
+    "word_plain": "気まずい",
+    "m_s": "尷尬的",
+    "m_l": "形容場面令人感到難為情...",
+    "e1_jp": "沈黙が気まずい。",
+    "e1_zh": "沉默很尷尬。",
+    "e2_jp": "目が合って気まずくなった。",
+    "e2_zh": "四目相對後變得很尷尬。"
+  },
+  { "d": 2, ... }
+]'></textarea>
+        <div class="ai-progress-bar" id="importProgress" style="display:none;"><div class="ai-progress-fill" id="importFill"></div></div>
+        <button class="btn-primary" onclick="importJson()" style="width:100%;padding:14px;font-size:15px;background:#2563EB;">✅ 確認導入</button>
+    </div>
+</div>
+
+<div class="app-container">
+    <!-- LEFT: Day Feed -->
+    <div class="left-col" id="leftCol" onscroll="handleScroll()">
+        <!-- ══ 智慧導入專區 ══ -->
+        <div style="width:100%;max-width:800px;background:white;border-radius:14px;border:2px solid #B5351A;overflow:hidden;box-shadow:0 4px 18px rgba(0,0,0,.08);">
+
+            <div style="background:#1A1410;padding:14px 20px;display:flex;align-items:center;gap:12px;">
+                <span style="color:#C9A84C;font-weight:800;font-size:15px;">🧪 智慧導入專區</span>
+                <span style="flex:1;"></span>
+                <button id="resetBtn" style="background:#7F1D1D;color:#FCA5A5;border:1px solid #991B1B;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:900;cursor:pointer;font-family:inherit;">🗑 清除全部資料</button>
+            </div>
+
+            <div style="padding:20px;display:flex;flex-direction:column;gap:16px;">
+
+                <!-- JSON 輸入 -->
+                <div>
+                    <div style="font-size:13px;font-weight:900;color:#B5351A;margin-bottom:8px;">📥 貼上 28 天 JSON</div>
+                    <textarea id="jsonImportInput" style="width:100%;height:200px;font-family:monospace;font-size:12px;box-sizing:border-box;border:2px solid #B5351A;border-radius:10px;padding:14px;resize:vertical;outline:none;line-height:1.7;background:#FAFAF8;"></textarea>
+                </div>
+
+                <div class="ai-progress-bar" id="importProgress"><div class="ai-progress-fill" id="importFill"></div></div>
+                <button class="btn-primary" style="width:100%;padding:14px;font-size:15px;" onclick="importJson()">✅ 導入 JSON</button>
+
+                <hr style="border:none;border-top:1px solid #eee;margin:4px 0;">
+
+                <!-- TSV 輸入 -->
+                <div>
+                    <div style="font-size:13px;font-weight:900;color:#555;margin-bottom:8px;">📊 Google Sheet TSV 導入</div>
+                    <textarea id="tsvInput" style="width:100%;height:80px;font-family:monospace;font-size:12px;box-sizing:border-box;border:1.5px solid #DDD;border-radius:8px;padding:10px;resize:vertical;outline:none;" placeholder="1&#9;&lt;ruby&gt;…&lt;/ruby&gt;&#9;待つ&#9;…"></textarea>
+                    <button class="btn-primary" style="width:100%;margin-top:8px;padding:11px;" onclick="importTsv()">確認導入 TSV 🧪</button>
+                </div>
+
+                <hr style="border:none;border-top:1px solid #eee;margin:4px 0;">
+
+                <!-- Prompt + Gemini -->
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <input id="alchemyTopicPanel" style="flex:1;background:#F8F5F0;border:1px solid #DDD;border-radius:6px;padding:8px 10px;font-size:12px;font-family:inherit;outline:none;" placeholder="主題方向（選填）">
+                    <button class="btn-primary" style="white-space:nowrap;font-size:12px;" onclick="copyAlchemyPrompt()">📋 複製 Prompt</button>
+                    <input id="alchemyTopic2" style="display:none;">
+                    <button class="btn-primary" style="white-space:nowrap;font-size:12px;background:#4A7C6E;" onclick="generateAlchemy()">⚡ Gemini 生成</button>
+                </div>
+
+            </div>
+        </div>
+        <div id="dayFeed" style="width:100%; display:flex; flex-direction:column; align-items:center; gap:40px;"></div>
+    </div>
+
+    <!-- RIGHT: SNS Editor -->
+    <aside class="right-col" id="sidebar">
+        <div class="collapse-handle" onclick="toggleLeftCol()">
+            <i class="fas fa-chevron-left" id="colIcon"></i>
+        </div>
+        <div class="sidebar-inner">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
+                <h3 style="margin:0; font-size:15px;">✦ SNS 快速編輯</h3>
+                <button class="btn-primary" style="font-size:11px; background:transparent; border:1px solid rgba(255,255,255,.5); padding:6px 12px;" onclick="openFsEditor()">⛶ 全螢幕</button>
+            </div>
+            <div class="sidebar-toolbar" style="flex-shrink:0;">
+                <button class="tb-btn" onclick="sideInsert('▍標題：')">▍標題</button>
+                <button class="tb-btn" onclick="sideWrap('「','」')">「 」</button>
+                <button class="tb-btn" onclick="sideWrap('【','】')">【 】</button>
+                <button class="tb-btn" onclick="sideInsert('\n　\n')">空行</button>
+                <button class="tb-btn" onclick="sideInsert('#小狸日語 #日語學習')">＃標籤</button>
+                <button class="tb-btn" onclick="toggleSideEmoji()" id="sideEmojiBtn">😀</button>
+                <span style="width:1px;background:rgba(255,255,255,.2);margin:0 1px;align-self:stretch;"></span>
+                <button class="tb-btn" onclick="sideWrap('**','**')" style="font-weight:900;">B</button>
+                <button class="tb-btn" onclick="sideWrap('_','_')" style="font-style:italic;">I</button>
+                <button class="tb-btn" onclick="sideWrapCode()" style="font-family:monospace;">TT</button>
+                <button class="tb-btn" onclick="sideClear()" style="color:#FDA4AF;">🗑</button>
+            </div>
+            <div class="emoji-panel" id="sideEmojiPanel">
+                <button class="e-btn" onclick="sideInsert('👇')">👇</button><button class="e-btn" onclick="sideInsert('⬇️')">⬇️</button><button class="e-btn" onclick="sideInsert('👉')">👉</button><button class="e-btn" onclick="sideInsert('➡️')">➡️</button><button class="e-btn" onclick="sideInsert('❇️')">❇️</button><button class="e-btn" onclick="sideInsert('✳️')">✳️</button><button class="e-btn" onclick="sideInsert('★')">★</button><button class="e-btn" onclick="sideInsert('⭐️')">⭐️</button><button class="e-btn" onclick="sideInsert('🔸')">🔸</button><button class="e-btn" onclick="sideInsert('🔶')">🔶</button><button class="e-btn" onclick="sideInsert('❤️')">❤️</button><button class="e-btn" onclick="sideInsert('💚')">💚</button><button class="e-btn" onclick="sideInsert('💜')">💜</button><button class="e-btn" onclick="sideInsert('🥰')">🥰</button><button class="e-btn" onclick="sideInsert('😂')">😂</button><button class="e-btn" onclick="sideInsert('💪')">💪</button><button class="e-btn" onclick="sideInsert('🌸')">🌸</button><button class="e-btn" onclick="sideInsert('🍵')">🍵</button><button class="e-btn" onclick="sideInsert('✨')">✨</button><button class="e-btn" onclick="sideInsert('🎯')">🎯</button><button class="e-btn" onclick="sideInsert('📚')">📚</button><button class="e-btn" onclick="sideInsert('🖊️')">🖊️</button><button class="e-btn" onclick="sideInsert('🐾')">🐾</button><button class="e-btn" onclick="sideInsert('🦊')">🦊</button>
+            </div>
+            <!-- 固定前言 -->
+            <div style="flex-shrink:0;">
+                <div style="font-size:10px;color:#6EE7B7;font-weight:700;letter-spacing:.05em;margin-bottom:4px;">📌 固定前言（每篇開頭自動帶入）</div>
+                <textarea id="snsPrefix" rows="2" onchange="saveSnsTemplate()" style="width:100%;background:#061020;color:#A5F3D4;border:1px solid rgba(110,231,183,.3);border-radius:6px;padding:8px 10px;font-size:12px;font-family:inherit;resize:vertical;outline:none;box-sizing:border-box;line-height:1.6;" placeholder="例：🐾 小狸日語 ｜每日一字&#10;&#xa;"></textarea>
+            </div>
+            <!-- 正文 -->
+            <div style="font-size:11px; color:#6B7280; flex-shrink:0; display:flex; justify-content:space-between;">
+                <span>Enter = 大空行 · Shift+Enter = 換行</span>
+                <span id="sideCharCount" style="font-weight:700;">500</span>
+            </div>
+            <textarea id="sideInput" placeholder="在此輸入貼文，或點左側「載入編輯」…"></textarea>
+            <!-- 固定結語 -->
+            <div style="flex-shrink:0;">
+                <div style="font-size:10px;color:#FCA5A5;font-weight:700;letter-spacing:.05em;margin-bottom:4px;">📌 固定結語（每篇結尾自動帶入）</div>
+                <textarea id="snsSuffix" rows="3" onchange="saveSnsTemplate()" style="width:100%;background:#1A0605;color:#FCA5A5;border:1px solid rgba(252,165,165,.3);border-radius:6px;padding:8px 10px;font-size:12px;font-family:inherit;resize:vertical;outline:none;box-sizing:border-box;line-height:1.6;" placeholder="例：📚 小狸老師著作《日語關鍵字》&#10;👉 連結 in bio&#10;#小狸日語 #日語學習"></textarea>
+            </div>
+            <!-- ✅ FIX: copyFormatted 正確定義 -->
+            <button class="btn-primary" style="width:100%; padding:14px; font-size:14px; flex-shrink:0;" onclick="copyFormatted()">✦ 合併並複製貼文 ✅</button>
+        </div>
+    </aside>
+</div>
+
+<!-- FULLSCREEN EDITOR -->
+<div id="fsEditorOverlay">
+    <div class="fs-card">
+        <div class="fs-header">
+            <div style="display:flex; align-items:center; gap:15px;">
+                <div style="width:40px; height:40px; background:linear-gradient(135deg,#B5351A,#E57348); border-radius:10px; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:18px;">✦</div>
+                <div>
+                    <div style="font-weight:700; font-size:18px;">小狸日語 SNS 編輯器</div>
+                    <div style="font-size:11px; color:#9CA3AF;">全螢幕模式</div>
+                </div>
+            </div>
+            <button onclick="closeFsEditor()" style="background:#FEF2F2; color:#DC2626; border:none; padding:8px 15px; border-radius:20px; cursor:pointer; font-weight:700; font-family:inherit;">✕ 關閉</button>
+        </div>
+        <!-- ✅ FIX: fs-body 有 padding，工具列，字數計數，convertAndCopyFs 已定義 -->
+        <div class="fs-body">
+            <div class="fs-toolbar" style="flex-shrink:0;">
+                <button class="fs-tb-btn" onclick="fsInsert('▍標題：')">▍標題</button>
+                <button class="fs-tb-btn" onclick="fsWrap('「','」')">「 」</button>
+                <button class="fs-tb-btn" onclick="fsWrap('【','】')">【 】</button>
+                <button class="fs-tb-btn" onclick="fsInsert('\n　\n')">空行</button>
+                <button class="fs-tb-btn" onclick="fsInsert('#小狸日語 #日語學習 #日文教學 #日本語勉強')">＃標籤</button>
+                <button class="fs-tb-btn" onclick="toggleFsEmoji()" id="fsEmojiBtn">😀</button>
+                <span style="width:1px;background:#DBEAFE;margin:0 2px;align-self:stretch;"></span>
+                <button class="fs-tb-btn" onclick="fsWrap('**','**')" style="font-weight:900;letter-spacing:-.5px;">B</button>
+                <button class="fs-tb-btn" onclick="fsWrap('_','_')" style="font-style:italic;font-weight:700;">I</button>
+                <button class="fs-tb-btn" onclick="fsWrapCode()" style="font-family:monospace;font-weight:700;letter-spacing:-.5px;">TT</button>
+                <button class="fs-tb-btn" style="color:#DC2626; background:#FEF2F2;" onclick="fsClear()">🗑</button>
+            </div>
+            <div class="fs-emoji-panel" id="fsEmojiPanel">
+                <button class="fs-e-btn" onclick="fsInsert('👇')">👇</button><button class="fs-e-btn" onclick="fsInsert('⬇️')">⬇️</button><button class="fs-e-btn" onclick="fsInsert('👉')">👉</button><button class="fs-e-btn" onclick="fsInsert('➡️')">➡️</button><button class="fs-e-btn" onclick="fsInsert('❇️')">❇️</button><button class="fs-e-btn" onclick="fsInsert('✳️')">✳️</button><button class="fs-e-btn" onclick="fsInsert('★')">★</button><button class="fs-e-btn" onclick="fsInsert('⭐️')">⭐️</button><button class="fs-e-btn" onclick="fsInsert('🔸')">🔸</button><button class="fs-e-btn" onclick="fsInsert('🔶')">🔶</button><button class="fs-e-btn" onclick="fsInsert('❤️')">❤️</button><button class="fs-e-btn" onclick="fsInsert('💚')">💚</button><button class="fs-e-btn" onclick="fsInsert('💜')">💜</button><button class="fs-e-btn" onclick="fsInsert('🥰')">🥰</button><button class="fs-e-btn" onclick="fsInsert('😂')">😂</button><button class="fs-e-btn" onclick="fsInsert('💪')">💪</button><button class="fs-e-btn" onclick="fsInsert('🌸')">🌸</button><button class="fs-e-btn" onclick="fsInsert('🍵')">🍵</button><button class="fs-e-btn" onclick="fsInsert('✨')">✨</button><button class="fs-e-btn" onclick="fsInsert('🎯')">🎯</button><button class="fs-e-btn" onclick="fsInsert('📚')">📚</button><button class="fs-e-btn" onclick="fsInsert('🖊️')">🖊️</button><button class="fs-e-btn" onclick="fsInsert('🐾')">🐾</button><button class="fs-e-btn" onclick="fsInsert('🦊')">🦊</button><button class="fs-e-btn" onclick="fsInsert('♦️')">♦️</button><button class="fs-e-btn" onclick="fsInsert('💎')">💎</button><button class="fs-e-btn" onclick="fsInsert('🌹')">🌹</button><button class="fs-e-btn" onclick="fsInsert('🎌')">🎌</button>
+            </div>
+            <textarea id="fsInput" placeholder="在此輸入文章內容…" oninput="updateFsChar()"></textarea>
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
+                <div class="fs-char-counter" id="fsCharCount">剩餘 500 字</div>
+                <button class="btn-primary" onclick="copyBookTsvFs()" style="font-size:12px; padding:6px 14px; background:#4A7C6E;">📑 書稿 TSV</button>
+            </div>
+            <button class="btn-primary" style="width:100%; padding:14px; background:linear-gradient(135deg,#B5351A,#E57348); font-size:15px; flex-shrink:0;" onclick="convertAndCopyFs()">✦ 轉換並複製到剪貼簿</button>
+        </div>
+    </div>
+</div>
+
+<div id="cardEditorOverlay">
+  <div class="ce-modal">
+    <div class="ce-topbar">
+      <div class="ce-title" id="ceTitle">✦ 圖卡預覽與編輯</div>
+      <div class="ce-tabs">
+        <button class="ce-tab active" id="ceTab0" onclick="ceSwitchTab(0)">P1 封面</button>
+        <button class="ce-tab" id="ceTab1" onclick="ceSwitchTab(1)">P2 解析</button>
+        <button class="ce-tab" id="ceTab2" onclick="ceSwitchTab(2)">P3 例句①</button>
+        <button class="ce-tab" id="ceTab3" onclick="ceSwitchTab(3)">P4 例句②</button>
+      </div>
+      <button onclick="closeCardEditor()" style="background:rgba(255,255,255,.12);border:none;color:white;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700;margin-left:10px;">✕</button>
+    </div>
+    <div class="ce-body">
+      <div class="ce-preview-col">
+        <div class="ce-preview-label">即時預覽</div>
+        <div id="cePreviewWrap" style="transform-origin:top center;"></div>
+        <!-- 字體大小控制 -->
+        <div style="margin-top:8px;background:#F4F4F0;border-radius:8px;padding:8px 10px;width:100%;box-sizing:border-box;">
+          <div style="font-size:10px;font-weight:800;color:#888;letter-spacing:.07em;margin-bottom:6px;">當前頁字體大小</div>
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:5px;">
+            <span style="font-size:11px;color:#555;width:42px;flex-shrink:0;">漢字</span>
+            <button type="button" onclick="changeMainSize(-2)" style="width:26px;height:26px;border-radius:5px;border:1px solid #ccc;background:#fff;cursor:pointer;font-size:15px;font-weight:900;line-height:1;padding:0;">−</button>
+            <span id="ceMainSizeLabel" style="font-size:12px;font-weight:700;color:#333;min-width:34px;text-align:center;">44px</span>
+            <button type="button" onclick="changeMainSize(2)" style="width:26px;height:26px;border-radius:5px;border:1px solid #ccc;background:#fff;cursor:pointer;font-size:15px;font-weight:900;line-height:1;padding:0;">＋</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:5px;">
+            <span style="font-size:11px;color:#555;width:42px;flex-shrink:0;">Ruby</span>
+            <button type="button" onclick="changeRubySize(-1)" style="width:26px;height:26px;border-radius:5px;border:1px solid #ccc;background:#fff;cursor:pointer;font-size:15px;font-weight:900;line-height:1;padding:0;">−</button>
+            <span id="ceRubySizeLabel" style="font-size:12px;font-weight:700;color:#333;min-width:34px;text-align:center;">14px</span>
+            <button type="button" onclick="changeRubySize(1)" style="width:26px;height:26px;border-radius:5px;border:1px solid #ccc;background:#fff;cursor:pointer;font-size:15px;font-weight:900;line-height:1;padding:0;">＋</button>
+          </div>
+        </div>
+        <!-- 紋様選擇 -->
+        <div style="margin-top:10px;text-align:center;">
+          <div style="font-size:11px;color:#888;font-weight:700;margin-bottom:6px;">紋様選擇</div>
+          <div id="cePatPicker" style="display:flex;flex-wrap:wrap;gap:5px;justify-content:center;"></div>
+        </div>
+        <div style="font-size:10px;color:#999;text-align:center;margin-top:6px;">修改後即時更新</div>
+      </div>
+      <div class="ce-edit-col" id="ceEditFields"></div>
+    </div>
+    <div class="ce-footer">
+      <button class="btn-primary" style="background:#4A7C6E;" onclick="ceSaveAndClose()">💾 儲存並關閉</button>
+      <button class="btn-primary" onclick="ceDownloadCurrent()">📥 下載此張 1080px</button>
+      <button class="btn-primary" onclick="ceDownloadAll()">📥 下載全部 4 張</button>
+    </div>
+  </div>
+</div>
+
+<div id="offscreen-render-zone"></div>
+<div id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+/* ═══════════════════════════════════════════
+   RUBY 解析
+═══════════════════════════════════════════ */
+function isPureKana(s) {
+    // true if every char is hiragana, katakana, prolonged sound mark, or small kana
+    return /^[ぁ-んァ-ヴーｦ-ﾟ・。、]+$/.test(s.replace(/\s/g,''));
+}
+function parseRuby(text) {
+    if (!text) return '';
+    return text.replace(/<ruby>(.*?)<rt>(.*?)<\/rt><\/ruby>/g, (_, kanji, kana) => {
+        // strip any inner tags to get plain base text
+        const base = kanji.replace(/<[^>]+>/g,'');
+        if (isPureKana(base)) {
+            // pure kana: render base only, no ruby annotation
+            return `<span class="ruby-base">${kanji}</span>`;
+        }
+        return `<ruby>${kanji}<rt>${kana}</rt></ruby>`;
+    });
+}
+
+function sideWrapCode() { sideWrap('`','`'); }
+function fsWrapCode()   { fsWrap('`','`'); }
+function stripRuby(text) {
+    if (!text) return '';
+    return text.replace(/<ruby>(.*?)<rt>.*?<\/rt><\/ruby>/g, '$1').replace(/<[^>]+>/g, '');
+}
+
+/* ═══════════════════════════════════════════
+   資料系統
+═══════════════════════════════════════════ */
+const DEFAULT_DAY = i => ({
+    d: i+1, word_ruby: '待つ', word_plain: '待つ', o: '', m_s: '（未填）', m_l: '',
+    e1_jp: '例句', e1_zh: '翻譯', e2_jp: '例句', e2_zh: '翻譯', cat: '', keys: ''
+});
+let monthData = (() => {
+    try {
+        const saved = JSON.parse(localStorage.getItem('kori_data'));
+        if (Array.isArray(saved) && saved.length) return saved;
+    } catch(e) {}
+    return Array.from({length:28}, (_,i) => DEFAULT_DAY(i));
+})();
+
+function persist() {
+    try {
+        localStorage.setItem('kori_data', JSON.stringify(monthData));
+        // 顯示儲存指示
+        const el = document.getElementById('saveIndicator');
+        if (el) {
+            const t = new Date();
+            const hhmm = t.getHours().toString().padStart(2,'0') + ':' + t.getMinutes().toString().padStart(2,'0');
+            el.textContent = '✅ 已儲存 ' + hhmm;
+            el.style.opacity = '1';
+            clearTimeout(el._hideTimer);
+            el._hideTimer = setTimeout(() => { el.style.opacity = '0'; }, 3000);
+        }
+    } catch(e) {}
+}
+
+/* ── 匯出備份 ── */
+function exportBackup() {
+    const payload = {
+        version: 'kori_v15',
+        savedAt: new Date().toISOString(),
+        monthData,
+        snsPrefix: localStorage.getItem('kori_sns_prefix') || '',
+        snsSuffix: localStorage.getItem('kori_sns_suffix') || '',
+        tabFontSizes,
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    const d = new Date();
+    a.download = `小狸日語備份_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}_${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}.json`;
+    a.click();
+    showToast('📦 備份已下載！請妥善保存');
+}
+
+/* ── 還原備份 ── */
+function importBackup(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const payload = JSON.parse(e.target.result);
+            // 相容舊格式（純陣列）或新格式（物件含 version）
+            const data = Array.isArray(payload) ? payload : payload.monthData;
+            if (!Array.isArray(data)) throw new Error('格式錯誤');
+            monthData = data;
+            if (payload.snsPrefix !== undefined) localStorage.setItem('kori_sns_prefix', payload.snsPrefix);
+            if (payload.snsSuffix !== undefined) localStorage.setItem('kori_sns_suffix', payload.snsSuffix);
+            if (payload.tabFontSizes) {
+                tabFontSizes = payload.tabFontSizes;
+                saveTabSizes();
+            }
+            persist();
+            loadSnsTemplate();
+            renderFeed();
+            showToast('✅ 備份還原成功！' + data.length + ' 天資料已載入');
+        } catch(err) {
+            showToast('❌ 還原失敗：' + err.message);
+        }
+        input.value = ''; // reset so same file can be re-selected
+    };
+    reader.readAsText(file);
+}
+
+/* ═══════════════════════════════════════════
+   ✅ FIX: API Key — 統一使用 kori_google_key
+   同時相容舊的 kori_api_key
+═══════════════════════════════════════════ */
+function loadApiKey() {
+    const key = localStorage.getItem('kori_google_key') || localStorage.getItem('kori_api_key') || '';
+    document.getElementById('apiKeyInput').value = key;
+    document.getElementById('apiDot').style.display = key ? 'block' : 'none';
+    return key;
+}
+
+/* ── 各頁字體大小 [[main,ruby], ...] 四頁 ── */
+// P0=封面大字, P1=解析文, P2=例①, P3=例②
+const DEFAULT_SIZES = [[44,14],[16,11],[28,12],[28,12]];
+let tabFontSizes = (() => {
+    try { const s = JSON.parse(localStorage.getItem('kori_tab_sizes2')); if(s && s.length===4) return s; } catch(e){}
+    return JSON.parse(JSON.stringify(DEFAULT_SIZES));
+})();
+function saveTabSizes() { localStorage.setItem('kori_tab_sizes2', JSON.stringify(tabFontSizes)); }
+function changeMainSize(delta) {
+    const idx = typeof ceTab !== 'undefined' ? ceTab : 0;
+    tabFontSizes[idx][0] = Math.min(72, Math.max(10, tabFontSizes[idx][0] + delta));
+    saveTabSizes(); updateCeSizeLabels(); if (ceDay !== null) ceRenderPreview();
+}
+function changeRubySize(delta) {
+    const idx = typeof ceTab !== 'undefined' ? ceTab : 0;
+    tabFontSizes[idx][1] = Math.min(24, Math.max(8, tabFontSizes[idx][1] + delta));
+    saveTabSizes(); updateCeSizeLabels(); if (ceDay !== null) ceRenderPreview();
+}
+function updateCeSizeLabels() {
+    const idx = typeof ceTab !== 'undefined' ? ceTab : 0;
+    const ml = document.getElementById('ceMainSizeLabel');
+    const rl = document.getElementById('ceRubySizeLabel');
+    if (ml) ml.textContent = tabFontSizes[idx][0] + 'px';
+    if (rl) rl.textContent = tabFontSizes[idx][1] + 'px';
+}
+// legacy shim
+function applyExSize() {}
+function changeExSize(d) { changeMainSize(d); }
+let exFontSize = tabFontSizes[2][0];
+
+/* ── SNS 固定前言/結語 存取 ── */
+function saveSnsTemplate() {
+    localStorage.setItem('kori_sns_prefix', document.getElementById('snsPrefix').value);
+    localStorage.setItem('kori_sns_suffix', document.getElementById('snsSuffix').value);
+}
+function loadSnsTemplate() {
+    const pre = localStorage.getItem('kori_sns_prefix') || '';
+    const suf = localStorage.getItem('kori_sns_suffix') || '';
+    document.getElementById('snsPrefix').value = pre;
+    document.getElementById('snsSuffix').value = suf;
+}
+function saveApiKey() {
+    const val = document.getElementById('apiKeyInput').value.trim();
+    if (!val) { showToast('請輸入 Key'); return; }
+    if (!val.startsWith('AIza')) { showToast('❌ 格式錯誤，應以 AIza 開頭'); return; }
+    localStorage.setItem('kori_google_key', val);
+    localStorage.setItem('kori_api_key', val); // 向下相容
+    document.getElementById('apiDot').style.display = 'block';
+    showToast('✅ Gemini Key 已儲存');
+}
+
+/* ═══════════════════════════════════════════
+   ✅ FIX: 主題
+═══════════════════════════════════════════ */
+const themes = ['theme-sakura', 'theme-matcha', 'theme-hydrangea', 'theme-shu'];
+let currentThemeIdx = 3;
+function rotateTheme() {
+    currentThemeIdx = (currentThemeIdx + 1) % themes.length;
+    document.body.className = themes[currentThemeIdx];
+    renderFeed(); // ✅ 重新渲染讓卡片 inline --kori-primary 同步更新
+}
+
+/* ═══════════════════════════════════════════
+   音效 — 和紙捲動聲（scroll tick）
+═══════════════════════════════════════════ */
+let soundEnabled = true;   // 預設開啟
+
+function toggleSound() {
+    soundEnabled = !soundEnabled;
+    const sw = document.getElementById('soundSwitch');
+    sw.classList.toggle('sound-active', soundEnabled);
+    sw.querySelector
+    // 更新標籤文字
+    sw.childNodes[0].textContent = soundEnabled ? '📜 和紙 ' : '📜 和紙 ';
+    sw.style.opacity = soundEnabled ? '1' : '.55';
+}
+
+// ── 滾動音效：和紙捲動聲 ──
+(function initScrollSound() {
+    let audioCtx = null;
+    let lastScrollY = 0;
+    let tickCooldown = false;
+
+    function getCtx() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        return audioCtx;
+    }
+
+    function playTick(velocity) {
+        if (!soundEnabled) return;
+        try {
+            const ctx = getCtx();
+            const buf = ctx.createBuffer(1, ctx.sampleRate * 0.04, ctx.sampleRate);
+            const data = buf.getChannelData(0);
+            for (let i = 0; i < data.length; i++) {
+                data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / data.length, 3);
+            }
+            const src = ctx.createBufferSource();
+            src.buffer = buf;
+            const filter = ctx.createBiquadFilter();
+            filter.type = 'highpass';
+            filter.frequency.value = 3200;
+            const gain = ctx.createGain();
+            const vol = Math.min(0.08, 0.025 + Math.abs(velocity) * 0.0008);
+            gain.gain.setValueAtTime(vol, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.04);
+            src.connect(filter);
+            filter.connect(gain);
+            gain.connect(ctx.destination);
+            src.start();
+        } catch(e) {}
+    }
+
+    // 等 DOM 就緒後綁定 leftCol（v13 的主捲軸容器）
+    function bindScroll() {
+        const scrollEl = document.getElementById('leftCol');
+        if (!scrollEl) { setTimeout(bindScroll, 200); return; }
+        scrollEl.addEventListener('scroll', function() {
+            const dy = this.scrollTop - lastScrollY;
+            lastScrollY = this.scrollTop;
+            if (tickCooldown) return;
+            if (Math.abs(dy) > 4) {
+                playTick(dy);
+                tickCooldown = true;
+                setTimeout(() => { tickCooldown = false; }, 80);
+            }
+        }, { passive: true });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bindScroll);
+    } else {
+        bindScroll();
+    }
+})();
+
+// handleScroll 保留空殼（HTML onscroll 屬性仍呼叫它）
+function handleScroll() {}
+
+/* ═══════════════════════════════════════════
+   Feed 渲染
+═══════════════════════════════════════════ */
+function renderFeed() {
+    const feed = document.getElementById('dayFeed');
+    feed.innerHTML = monthData.map(data => `
+        <div style="display:flex; gap:20px; background:white; padding:25px; border-radius:15px; border:1px solid #ddd; width:100%; max-width:800px; box-sizing:border-box;">
+            <div class="ig-card" id="card-${data.d}" style="--kori-primary:${getThemeColor()};background:${getThemeBg()};color:${getThemeText()};">
+                <div class="card-pattern" style="${getPatternStyle()}"></div>
+                <div class="card-header">
+                    <div class="header-badge">DAY ${String(data.d).padStart(2,'0')}</div>
+                    <div style="font-size:11px; font-weight:bold; opacity:.6;">小狸日語</div>
+                </div>
+                <div class="cover-body">
+                    <div class="cover-title">${parseRuby(data.word_ruby)}</div>
+                    <div class="cover-desc">${data.m_s}</div>
+                </div>
+
+            </div>
+            <div style="flex:1; display:flex; flex-direction:column; gap:10px; min-width:0;">
+                <h3 style="margin:0; font-size:16px; color:var(--night);">Day ${data.d}：${data.word_plain}</h3>
+                <div style="font-size:12px; color:#666; line-height:1.6;">${data.m_s}</div>
+                <button class="btn-primary" style="background:#4A7C6E;" onclick="openCardEditor(${data.d})">🖼 預覽與編輯 4 張圖卡</button>
+                <button class="btn-primary" onclick="downloadAllFour(${data.d}, this)">📥 下載 1080px（4張）</button>
+                <button class="btn-primary" style="background:#5D78AB;" onclick="loadToEditor(${data.d})">✏️ 載入至 SNS 編輯器</button>
+            </div>
+        </div>`).join('');
+}
+
+function getThemeColor() {
+    const map = { 'theme-sakura':'#C0607A', 'theme-matcha':'#3A7055', 'theme-hydrangea':'#4860A8', 'theme-shu':'#B5351A' };
+    return map[themes[currentThemeIdx]] || '#B5351A';
+}
+function getThemeBg() {
+    const map = { 'theme-sakura':'#FDF0F4', 'theme-matcha':'#EEF8F2', 'theme-hydrangea':'#EFF2FF', 'theme-shu':'#FAF7F2' };
+    return map[themes[currentThemeIdx]] || '#FAF7F2';
+}
+function getThemeText() {
+    const map = { 'theme-sakura':'#2A1018', 'theme-matcha':'#0F2218', 'theme-hydrangea':'#10183A', 'theme-shu':'#1A1410' };
+    return map[themes[currentThemeIdx]] || '#1A1410';
+}
+function getPatternStyle() {
+    const { image, size, opacity } = buildPatternBg(currentPatternIdx);
+    return `background-image:${image};background-size:${size};opacity:${opacity};`;
+}
+
+/* ═══════════════════════════════════════════
+   ✅ FIX: downloadAllFour — 用 scale 而非 transform
+   保持卡片 380px，以 scale=1080/380≈2.842 輸出 1080px
+═══════════════════════════════════════════ */
+async function downloadAllFour(day, btn) {
+    const data = monthData.find(d => d.d === day);
+    if (!data) return;
+    const orig = btn.innerHTML; btn.innerHTML = '⏳ 生成中…'; btn.disabled = true;
+
+    const zone = document.getElementById('offscreen-render-zone');
+    const color = getThemeColor();
+    const SCALE = 1080 / 380;
+
+    const layouts = [0,1,2,3].map(ti => ceGetLayoutHTML(data, ti));
+
+    for (let i = 0; i < 4; i++) {
+        const { image:pi, size:ps, opacity:po } = buildPatternBg(currentPatternIdx);
+        zone.innerHTML = `
+            <div class="ig-card" style="--kori-primary:${color};background:${getThemeBg()};color:${getThemeText()};width:380px;height:380px;border-radius:0;">
+                <div class="card-pattern" style="background-image:${pi};background-size:${ps};opacity:${po};"></div>
+                <div class="card-header">
+                    <div style="font-size:11px;font-weight:bold;opacity:.6;">小狸日語</div>
+                </div>
+                ${layouts[i]}
+            </div>`;
+        const card = zone.firstElementChild;
+        try {
+            const canvas = await html2canvas(card, {
+                scale: SCALE,           // 380 × 2.842 ≈ 1080px
+                useCORS: true,
+                backgroundColor: '#FAF7F2',
+                logging: false,
+                allowTaint: true
+            });
+            // 確保輸出精確 1080×1080
+            const out = document.createElement('canvas');
+            out.width = 1080; out.height = 1080;
+            const ctx = out.getContext('2d');
+            ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+            ctx.fillStyle = getThemeBg(); ctx.fillRect(0,0,1080,1080);
+            ctx.drawImage(canvas, 0, 0, 1080, 1080);
+            const link = document.createElement('a');
+            link.download = `小狸日語_${data.word_plain||('Day'+day)}_P${i+1}.jpg`;
+            link.href = out.toDataURL('image/jpeg', 0.95);
+            link.click();
+        } catch(e) { console.error('圖卡', i+1, e); }
+        await new Promise(r => setTimeout(r, 500));
+    }
+    zone.innerHTML = '';
+    btn.innerHTML = '✅ 下載完成'; btn.disabled = false;
+    setTimeout(() => { btn.innerHTML = orig; }, 2500);
+}
+
+/* ═══════════════════════════════════════════
+   UI 控制
+═══════════════════════════════════════════ */
+function toggleLeftCol() {
+    const col = document.getElementById('leftCol');
+    const icon = document.getElementById('colIcon');
+    col.classList.toggle('collapsed');
+    icon.className = col.classList.contains('collapsed') ? 'fas fa-chevron-right' : 'fas fa-chevron-left';
+}
+
+let currentEditorDay = null;
+
+function loadToEditor(day) {
+    const d = monthData.find(x => x.d === day);
+    if (!d) return;
+    currentEditorDay = day;
+    const text = `▍【今日單字：${d.word_plain}】\n\n意思：${d.m_s}\n　\n${d.m_l}\n　\n① ${stripRuby(d.e1_jp)}\n（${d.e1_zh}）\n　\n② ${stripRuby(d.e2_jp)}\n（${d.e2_zh}）`;
+    document.getElementById('sideInput').value = text;
+    updateSideChar();
+    document.getElementById('sidebar').scrollIntoView({ behavior: 'smooth' });
+    showToast(`Day ${day} 已載入編輯器`);
+}
+
+/* ═══════════════════════════════════════════
+   Sidebar 工具列
+═══════════════════════════════════════════ */
+function sideInsert(txt) {
+    const ta = document.getElementById('sideInput');
+    const s = ta.selectionStart;
+    ta.value = ta.value.slice(0,s) + txt + ta.value.slice(ta.selectionEnd);
+    ta.selectionStart = ta.selectionEnd = s + txt.length;
+    ta.focus(); updateSideChar();
+}
+function sideWrap(o, c) {
+    const ta = document.getElementById('sideInput');
+    const s = ta.selectionStart, e = ta.selectionEnd;
+    if (s === e) return sideInsert(o + c);
+    ta.value = ta.value.slice(0,s) + o + ta.value.slice(s,e) + c + ta.value.slice(e);
+    ta.focus(); updateSideChar();
+}
+function sideClear() { if(confirm('確定清空？')) { document.getElementById('sideInput').value=''; updateSideChar(); } }
+function updateSideChar() {
+    const len = document.getElementById('sideInput').value.length;
+    const el = document.getElementById('sideCharCount');
+    el.textContent = `${500 - len}`;
+    el.style.color = len > 500 ? '#EF4444' : len > 450 ? '#F59E0B' : '#6B7280';
+}
+document.getElementById('sideInput').addEventListener('input', updateSideChar);
+document.getElementById('sideInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+        e.preventDefault();
+        const s = this.selectionStart;
+        this.value = this.value.slice(0,s) + '\n　\n' + this.value.slice(this.selectionEnd);
+        this.selectionStart = this.selectionEnd = s + 3;
+        updateSideChar();
+    }
+});
+
+/* ═══════════════════════════════════════════
+   ✅ FIX: copyFormatted 正確定義
+═══════════════════════════════════════════ */
+/* ─── Unicode 格式轉換（讓 IG / Threads 顯示粗體/斜體/打字機）───── */
+const UNI_BOLD = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+const UNI_BOLD_MAP = '𝗔𝗕𝗖𝗗𝗘𝗙𝗚𝗛𝗜𝗝𝗞𝗟𝗠𝗡𝗢𝗣𝗤𝗥𝗦𝗧𝗨𝗩𝗪𝗫𝗬𝗭𝗮𝗯𝗰𝗱𝗲𝗳𝗴𝗵𝗶𝗷𝗸𝗹𝗺𝗻𝗼𝗽𝗾𝗿𝘀𝘁𝘂𝘃𝘄𝘅𝘆𝘇𝟬𝟭𝟮𝟯𝟰𝟱𝟲𝟳𝟴𝟵'.split('');
+const UNI_ITAL_MAP = '𝘈𝘉𝘊𝘋𝘌𝘍𝘎𝘏𝘐𝘑𝘒𝘓𝘔𝘕𝘖𝘗𝘘𝘙𝘚𝘛𝘜𝘝𝘞𝘟𝘠𝘡𝘢𝘣𝘤𝘥𝘦𝘧𝘨𝘩𝘪𝘫𝘬𝘭𝘮𝘯𝘰𝘱𝘲𝘳𝘴𝘵𝘶𝘷𝘸𝘹𝘺𝘻𝟬𝟭𝟮𝟯𝟰𝟱𝟲𝟳𝟴𝟵'.split('');
+const UNI_MONO_MAP = '𝙰𝙱𝙲𝙳𝙴𝙵𝙶𝙷𝙸𝙹𝙺𝙻𝙼𝙽𝙾𝙿𝚀𝚁𝚂𝚃𝚄𝚅𝚆𝚇𝚈𝚉𝚊𝚋𝚌𝚍𝚎𝚏𝚐𝚑𝚒𝚓𝚔𝚕𝚖𝚗𝚘𝚙𝚚𝚛𝚜𝚝𝚞𝚟𝚠𝚡𝚢𝚣𝟶𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿'.split('');
+
+function mapChar(c, map) {
+    const i = UNI_BOLD.indexOf(c);
+    return i >= 0 ? map[i] : c;
+}
+function applyUnicode(text) {
+    // **bold** → 𝗯𝗼𝗹𝗱
+    text = text.replace(/\*\*([^*]+)\*\*/g, (_, s) => s.split('').map(c => mapChar(c, UNI_BOLD_MAP)).join(''));
+    // _italic_ → 𝘪𝘵𝘢𝘭𝘪𝘤
+    text = text.replace(/_([^_\n]+)_/g, (_, s) => s.split('').map(c => mapChar(c, UNI_ITAL_MAP)).join(''));
+    // `mono` → 𝚖𝚘𝚗𝚘
+    text = text.replace(/`([^`\n]+)`/g, (_, s) => s.split('').map(c => mapChar(c, UNI_MONO_MAP)).join(''));
+    return text;
+}
+
+function copyFormatted() {
+    const text = document.getElementById('sideInput').value;
+    if (!text.trim()) { showToast('請先輸入內容'); return; }
+    saveSnsTemplate();
+    const pre  = document.getElementById('snsPrefix').value.trim();
+    const suf  = document.getElementById('snsSuffix').value.trim();
+    const body = text.replace(/\n\n/g, '\n　\n');
+    const parts = [pre, body, suf].filter(Boolean);
+    const raw = parts.join('\n　\n');
+    const final = applyUnicode(raw);
+    navigator.clipboard.writeText(final)
+        .then(() => showToast('✅ 複製成功！粗體/斜體/打字機已轉換'))
+        .catch(() => { alert('複製失敗，請手動複製'); });
+}
+
+/* ═══════════════════════════════════════════
+   全螢幕編輯器
+═══════════════════════════════════════════ */
+function openFsEditor() {
+    document.getElementById('fsInput').value = document.getElementById('sideInput').value;
+    document.getElementById('fsEditorOverlay').style.display = 'flex';
+    updateFsChar();
+    setTimeout(() => document.getElementById('fsInput').focus(), 100);
+}
+function closeFsEditor() {
+    document.getElementById('sideInput').value = document.getElementById('fsInput').value;
+    document.getElementById('fsEditorOverlay').style.display = 'none';
+    updateSideChar();
+}
+function fsInsert(txt) {
+    const ta = document.getElementById('fsInput');
+    const s = ta.selectionStart;
+    ta.value = ta.value.slice(0,s) + txt + ta.value.slice(ta.selectionEnd);
+    ta.selectionStart = ta.selectionEnd = s + txt.length;
+    ta.focus(); updateFsChar();
+}
+function fsWrap(o, c) {
+    const ta = document.getElementById('fsInput');
+    const s = ta.selectionStart, e = ta.selectionEnd;
+    if (s === e) return fsInsert(o + c);
+    ta.value = ta.value.slice(0,s) + o + ta.value.slice(s,e) + c + ta.value.slice(e);
+    ta.focus(); updateFsChar();
+}
+function fsClear() { if(confirm('確定清空？')) { document.getElementById('fsInput').value=''; updateFsChar(); } }
+function updateFsChar() {
+    const len = document.getElementById('fsInput').value.length;
+    const el = document.getElementById('fsCharCount');
+    const rem = 500 - len;
+    el.textContent = rem < 0 ? `超過 ${Math.abs(rem)} 字` : `剩餘 ${rem} 字`;
+    el.className = 'fs-char-counter' + (rem < 0 ? ' over' : rem < 50 ? ' warn' : '');
+}
+document.getElementById('fsInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+        e.preventDefault();
+        const s = this.selectionStart;
+        this.value = this.value.slice(0,s) + '\n　\n' + this.value.slice(this.selectionEnd);
+        this.selectionStart = this.selectionEnd = s + 3;
+        updateFsChar();
+    }
+});
+
+/* ═══════════════════════════════════════════
+   ✅ FIX: convertAndCopyFs — 原本完全缺失
+═══════════════════════════════════════════ */
+function convertAndCopyFs() {
+    const text = document.getElementById('fsInput').value;
+    if (!text.trim()) { showToast('請先輸入內容'); return; }
+    saveSnsTemplate();
+    const pre  = document.getElementById('snsPrefix').value.trim();
+    const suf  = document.getElementById('snsSuffix').value.trim();
+    const body = text.replace(/\n\n/g, '\n　\n');
+    const parts = [pre, body, suf].filter(Boolean);
+    const final = parts.join('\n　\n');
+    navigator.clipboard.writeText(final)
+        .then(() => { closeFsEditor(); showToast('✅ 複製成功！（含前言+結語）'); })
+        .catch(() => alert('複製失敗，請手動複製'));
+}
+
+/* ═══════════════════════════════════════════
+   ✅ FIX: importTsv — 修正欄位對齊 (col[3]=o)
+   格式：d | word_ruby | word_plain | o | m_s | m_l | e1_jp | e1_zh | e2_jp | e2_zh | cat | keys
+═══════════════════════════════════════════ */
+function importTsv() {
+    const raw = document.getElementById('tsvInput').value.trim();
+    if (!raw) { showToast('請先貼上資料'); return; }
+    const lines = raw.split('\n').filter(l => l.trim());
+    // 自動跳過表頭（第一格不是數字）
+    const dataLines = isNaN(parseInt(lines[0].split('\t')[0])) ? lines.slice(1) : lines;
+    let count = 0, skipped = 0;
+    dataLines.forEach(line => {
+        const cols = line.split('\t');
+        if (cols.length < 3) { skipped++; return; }
+        const d = parseInt(cols[0]);
+        if (isNaN(d) || d < 1 || d > 28) { skipped++; return; }
+        const idx = monthData.findIndex(x => x.d === d);
+        if (idx === -1) { skipped++; return; }
+        monthData[idx] = {
+            ...monthData[idx],
+            word_ruby:  cols[1]?.trim() || monthData[idx].word_ruby,
+            word_plain: cols[2]?.trim() || monthData[idx].word_plain,
+            o:          cols[3]?.trim() || '',
+            m_s:        cols[4]?.trim() || monthData[idx].m_s,
+            m_l:        cols[5]?.trim() || monthData[idx].m_l,
+            e1_jp:      cols[6]?.trim() || monthData[idx].e1_jp,
+            e1_zh:      cols[7]?.trim() || monthData[idx].e1_zh,
+            e2_jp:      cols[8]?.trim() || monthData[idx].e2_jp,
+            e2_zh:      cols[9]?.trim() || monthData[idx].e2_zh,
+            cat:        cols[10]?.trim() || '',
+            keys:       cols[11]?.trim() || '',
+        };
+        count++;
+    });
+    persist();
+    renderFeed();
+    showToast(`✅ 導入 ${count} 天${skipped ? `（跳過 ${skipped}）` : ''}`);
+}
+
+function openJsonModal() {
+    document.getElementById('jsonModal').style.display = 'flex';
+    setTimeout(() => document.getElementById('jsonImportInput').focus(), 100);
+}
+function closeJsonModal() {
+    document.getElementById('jsonModal').style.display = 'none';
+}
+function hardReset() {
+    if (confirm('確定清除所有資料？此操作不可復原。')) {
+        localStorage.removeItem('kori_data');
+        location.reload();
+    }
+}
+
+
+function switchImpTab(tab) {
+    const isJson = tab === 'json';
+    document.getElementById('impPanelJson').style.display = isJson ? 'flex' : 'none';
+    document.getElementById('impPanelTsv').style.display  = isJson ? 'none' : 'flex';
+    const btnJ = document.getElementById('impTabJson');
+    const btnT = document.getElementById('impTabTsv');
+    btnJ.style.background    = isJson ? '#FFF8F2' : 'transparent';
+    btnJ.style.color         = isJson ? 'var(--blue)' : '#888';
+    btnJ.style.borderBottomColor = isJson ? 'var(--blue)' : 'transparent';
+    btnT.style.background    = isJson ? 'transparent' : '#FFF8F2';
+    btnT.style.color         = isJson ? '#888' : 'var(--blue)';
+    btnT.style.borderBottomColor = isJson ? 'transparent' : 'var(--blue)';
+}
+
+/* ─── 同步兩個主題輸入框 ─── */
+function syncAlchemyTopic(el) {
+    const other = el.id === 'alchemyTopic' ? 'alchemyTopicPanel' : 'alchemyTopic';
+    const o = document.getElementById(other);
+    if (o) o.value = el.value;
+    const t = document.getElementById('alchemyTopic2');
+    if (t && el.id !== 'alchemyTopic2') t.value = el.value;
+}
+
+/* ═══════════════════════════════════════════
+   複製 28 天 Prompt（供外部 AI 使用）
+═══════════════════════════════════════════ */
+function copyAlchemyPrompt() {
+    const topic = (document.getElementById('alchemyTopicPanel').value || document.getElementById('alchemyTopic2').value || '').trim();
+    const topicLine = topic ? `本月主題方向：【${topic}】，請圍繞此方向選詞。` : '請自由選擇對台灣日語學習者最有幫助的詞彙。';
+    const prompt = `你是日語教學專家，協助台灣教師小狸製作 SNS 教學內容。${topicLine}
+請以 JSON 陣列輸出 28 天教學內容，只輸出純 JSON，不含說明文字或 markdown，直接以 [ 開頭，以 ] 結尾。
+
+每筆格式如下（共 28 筆，d 從 1 到 28）：
+[
+  {
+    "d": 1,
+    "word_ruby": "<ruby>気<rt>き</rt></ruby>まずい",
+    "word_plain": "気まずい",
+    "o": "有這種尷尬的場合嗎？",
+    "m_s": "尷尬的",
+    "m_l": "形容場面或氣氛令人感到不舒服、難為情。可用於人際關係、職場等各種場景。",
+    "e1_jp": "<ruby>沈黙<rt>ちんもく</rt></ruby>が<ruby>気<rt>き</rt></ruby>まずい。",
+    "e1_zh": "沉默很尷尬。",
+    "e2_jp": "<ruby>目<rt>め</rt></ruby>が<ruby>合<rt>あ</rt></ruby>って<ruby>気<rt>き</rt></ruby>まずくなった。",
+    "e2_zh": "四目相對後變得很尷尬。",
+    "cat": "N3單字",
+    "keys": "気まずい,尷尬"
+  }
+]
+
+Ruby 標注格式：<ruby>漢字<rt>假名</rt></ruby>
+請完整輸出所有 28 個物件，不要省略。`;
+    navigator.clipboard.writeText(prompt)
+        .then(() => showToast('📋 Prompt 已複製！請貼到 ChatGPT / Claude / Gemini'))
+        .catch(() => showToast('複製失敗，請手動複製'));
+}
+
+/* ═══════════════════════════════════════════
+   JSON 28 天導入
+═══════════════════════════════════════════ */
+function importJson() {
+    const raw = document.getElementById('jsonImportInput').value.trim();
+    if (!raw) { showToast('請先貼上 JSON 內容'); return; }
+
+    // 進度動畫
+    const bar = document.getElementById('importFill');
+    const barWrap = document.getElementById('importProgress');
+    barWrap.style.display = 'block'; bar.style.width = '0%';
+    setTimeout(() => { bar.style.width = '60%'; }, 50);
+
+    let parsed;
+    try {
+        let s = raw.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+        const fi = s.indexOf('['), li = s.lastIndexOf(']');
+        if (fi !== -1 && li > fi) s = s.slice(fi, li+1);
+        parsed = JSON.parse(s);
+        if (!Array.isArray(parsed)) throw new Error('頂層應為 JSON 陣列 [...]');
+    } catch(e) {
+        bar.style.width = '0%'; barWrap.style.display = 'none';
+        showToast('❌ JSON 解析失敗：' + e.message);
+        return;
+    }
+
+    setTimeout(() => { bar.style.width = '100%'; }, 100);
+
+    let count = 0, skipped = 0;
+    parsed.forEach(item => {
+        const day = Number(item.d || item.day);
+        if (!day || day < 1 || day > 28) { skipped++; return; }
+        const idx = monthData.findIndex(x => x.d === day);
+        if (idx === -1) { skipped++; return; }
+        monthData[idx] = {
+            ...monthData[idx],
+            word_ruby:  item.word_ruby  || monthData[idx].word_ruby,
+            word_plain: item.word_plain || monthData[idx].word_plain,
+            o:          item.o          || '',
+            m_s:        item.m_s        || monthData[idx].m_s,
+            m_l:        item.m_l        || monthData[idx].m_l,
+            e1_jp:      item.e1_jp      || monthData[idx].e1_jp,
+            e1_zh:      item.e1_zh      || monthData[idx].e1_zh,
+            e2_jp:      item.e2_jp      || monthData[idx].e2_jp,
+            e2_zh:      item.e2_zh      || monthData[idx].e2_zh,
+            cat:        item.cat        || '',
+            keys:       item.keys       || '',
+        };
+        count++;
+    });
+
+    persist(); renderFeed();
+    setTimeout(() => { barWrap.style.display = 'none'; bar.style.width = '0%'; }, 800);
+    document.getElementById('jsonImportInput').value = '';
+    closeJsonModal();
+    showToast(`🎉 導入完成！${count} 天${skipped ? `（跳過 ${skipped}）` : ''}`);
+}
+
+
+async function generateAlchemy() {
+    const key = loadApiKey();
+    if (!key) { showToast('⚠ 請先填入並儲存 Gemini Key'); document.getElementById('apiKeyInput').focus(); return; }
+    const topic = document.getElementById('alchemyTopic').value.trim();
+    const btn = document.querySelector('button[onclick="generateAlchemy()"]');
+    const orig = btn.innerHTML; btn.innerHTML = '⏳ 生成中…'; btn.disabled = true;
+
+    const topicLine = topic ? `本月主題方向：【${topic}】，請圍繞此方向選詞。` : '請自由選擇對台灣日語學習者最有幫助的詞彙。';
+    const prompt = `你是日語教學專家，協助台灣教師小狸製作 SNS 教學內容。${topicLine}
+請以 JSON 陣列輸出 28 天教學內容，只輸出純 JSON，不含說明文字或 markdown。
+格式：[{"d":1,"word_ruby":"<ruby>気<rt>き</rt></ruby>まずい","word_plain":"気まずい","o":"有這種尷尬的場合嗎？","m_s":"尷尬的","m_l":"形容場面或氣氛令人感到不舒服、難為情。","e1_jp":"沈黙が気まずい。","e1_zh":"沉默很尷尬。","e2_jp":"目が合って気まずくなった。","e2_zh":"四目相對後變得很尷尬。","cat":"N3單字","keys":"気まずい,尷尬"}]
+請完整輸出所有 28 個物件。`;
+
+    try {
+        const geminiModel = localStorage.getItem('kori_gemini_model') || 'gemini-2.5-flash-preview-04-17';
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${key}`;
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents:[{parts:[{text:prompt}]}], generationConfig:{maxOutputTokens:8192,temperature:0.9} })
+        });
+        if (!res.ok) {
+            const e = await res.json().catch(()=>({}));
+            throw new Error(e.error?.message || `HTTP ${res.status}`);
+        }
+        const j = await res.json();
+        const text = j.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('') || '';
+        let s = text.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+        const fi = s.indexOf('['), li = s.lastIndexOf(']');
+        if (fi !== -1 && li > fi) s = s.slice(fi, li+1);
+        const parsed = JSON.parse(s);
+        if (!Array.isArray(parsed)) throw new Error('回應格式錯誤');
+        parsed.forEach(item => {
+            const idx = monthData.findIndex(d => d.d === item.d);
+            if (idx !== -1) monthData[idx] = { ...monthData[idx], ...item, editedText: '' };
+        });
+        persist(); renderFeed();
+        showToast(`🎉 AI 生成完成！${parsed.length} 天內容已更新`);
+    } catch(e) {
+        showToast('❌ 生成失敗：' + e.message);
+        console.error(e);
+    } finally {
+        btn.innerHTML = orig; btn.disabled = false;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   Emoji 面板切換
+═══════════════════════════════════════════ */
+function toggleSideEmoji() {
+    const panel = document.getElementById('sideEmojiPanel');
+    panel.classList.toggle('open');
+}
+function toggleFsEmoji() {
+    const panel = document.getElementById('fsEmojiPanel');
+    panel.classList.toggle('open');
+}
+
+/* ═══════════════════════════════════════════
+   書稿 TSV（Google Sheet 格式）
+   欄位：日期 | 章節 | 關鍵字 | 標題 | 摘要 | 全文 | 狀態
+═══════════════════════════════════════════ */
+function copyBookTsvFs() {
+    const text = document.getElementById('fsInput').value.trim();
+    if (!text) { showToast('請先輸入內容'); return; }
+    const today = new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'}).replace(/\//g,'-');
+    const dayObj = currentEditorDay ? monthData.find(x => x.d === currentEditorDay) : null;
+    const chapter  = dayObj?.cat   || '';
+    const keywords = dayObj?.keys  || '';
+    const title    = dayObj ? `Day${dayObj.d} ${dayObj.word_plain}` : text.split('\n')[0].replace(/^[▍\s【】]+/,'').slice(0,30);
+    const summary  = dayObj?.m_s   || text.split('\n').slice(0,2).join(' ').slice(0,60);
+    const row = [today, chapter, keywords, title, summary, text, '待審'];
+    function tsvCell(s) {
+        s = String(s == null ? '' : s);
+        if (s.includes('\t') || s.includes('"') || s.includes('\n')) return '"' + s.replace(/"/g,'""') + '"';
+        return s;
+    }
+    const tsv = row.map(tsvCell).join('\t');
+    navigator.clipboard.writeText(tsv).then(() => {
+        window.open('https://docs.google.com/spreadsheets/d/1Ym-ELnrYKV-MgYOJWDf1_TMYWH6Aw4ynsAYgbLxG4Ic/edit', '_blank');
+        showToast('✅ 書稿 TSV 已複製！請貼到 Google Sheet');
+    }).catch(() => showToast('複製失敗，請手動複製'));
+}
+
+/* ═══════════════════════════════════════════
+   Toast 通知
+═══════════════════════════════════════════ */
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* ═══════════════════════════════════════════
+   花紋系統 — 8 種正統和風紋様
+═══════════════════════════════════════════ */
+const PATTERNS = [
+  { name:'菱形（ひし）',
+    fn: c => `<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28'><path d='M14 2 L26 14 L14 26 L2 14 Z' fill='none' stroke='${c}' stroke-width='1.3'/></svg>`,
+    size:'28px', op:.1 },
+  { name:'七宝（しっぽう）',
+    fn: c => `<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><circle cx='0' cy='0' r='20' fill='none' stroke='${c}' stroke-width='1.2'/><circle cx='40' cy='0' r='20' fill='none' stroke='${c}' stroke-width='1.2'/><circle cx='0' cy='40' r='20' fill='none' stroke='${c}' stroke-width='1.2'/><circle cx='40' cy='40' r='20' fill='none' stroke='${c}' stroke-width='1.2'/><circle cx='20' cy='20' r='20' fill='none' stroke='${c}' stroke-width='1.2'/></svg>`,
+    size:'40px', op:.1 },
+  { name:'青海波（せいかいは）',
+    fn: c => `<svg xmlns='http://www.w3.org/2000/svg' width='40' height='22'><path d='M0 22 Q10 2 20 22' fill='none' stroke='${c}' stroke-width='1.3'/><path d='M20 22 Q30 2 40 22' fill='none' stroke='${c}' stroke-width='1.3'/><path d='M-20 22 Q-10 2 0 22' fill='none' stroke='${c}' stroke-width='1.3'/></svg>`,
+    size:'40px 22px', op:.12 },
+  { name:'亀甲（きっこう）',
+    fn: c => `<svg xmlns='http://www.w3.org/2000/svg' width='46' height='40'><path d='M12 2 L34 2 L46 20 L34 38 L12 38 L0 20 Z' fill='none' stroke='${c}' stroke-width='1.3'/></svg>`,
+    size:'46px 40px', op:.09 },
+  { name:'麻の葉（あさのは）',
+    fn: c => `<svg xmlns='http://www.w3.org/2000/svg' width='34' height='34'><line x1='17' y1='0' x2='17' y2='34' stroke='${c}' stroke-width='1'/><line x1='0' y1='17' x2='34' y2='17' stroke='${c}' stroke-width='1'/><line x1='0' y1='0' x2='34' y2='34' stroke='${c}' stroke-width='1'/><line x1='34' y1='0' x2='0' y2='34' stroke='${c}' stroke-width='1'/><circle cx='17' cy='17' r='5' fill='none' stroke='${c}' stroke-width='1'/></svg>`,
+    size:'34px', op:.1 },
+  { name:'矢絣（やがすり）',
+    fn: c => `<svg xmlns='http://www.w3.org/2000/svg' width='18' height='24'><path d='M9 0 L18 12 L9 24 L0 12 Z' fill='${c}'/><rect x='7' y='0' width='4' height='24' fill='white' opacity='0.9'/></svg>`,
+    size:'18px 24px', op:.07 },
+  { name:'市松（いちまつ）',
+    fn: c => `<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><rect x='0' y='0' width='10' height='10' fill='${c}'/><rect x='10' y='10' width='10' height='10' fill='${c}'/></svg>`,
+    size:'20px', op:.07 },
+  { name:'籠目（かごめ）',
+    fn: c => `<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36'><polygon points='18,4 32,28 4,28' fill='none' stroke='${c}' stroke-width='1.2'/><polygon points='18,32 4,8 32,8' fill='none' stroke='${c}' stroke-width='1.2'/></svg>`,
+    size:'36px', op:.1 },
+];
+
+let currentPatternIdx = 0;
+
+function buildPatternBg(idx) {
+    const p = PATTERNS[idx];
+    const col = getThemeColor();
+    const svg = p.fn(col);
+    // btoa base64: 100% reliable across all browsers for SVG data URLs
+    const b64 = btoa(unescape(encodeURIComponent(svg)));
+    return { image:'url(data:image/svg+xml;base64,' + b64 + ')', size: p.size, opacity: p.op };
+}
+
+function applyPattern(idx) {
+    currentPatternIdx = idx;
+    refreshPatternSwatches();
+    renderFeed();
+    if (document.getElementById('cardEditorOverlay').classList.contains('open')) ceRenderPreview();
+}
+
+function initPatternPicker() {
+    const picker = document.getElementById('patPicker');
+    picker.innerHTML = '<span style="font-size:10px;color:#9A8E83;white-space:nowrap;">紋</span>';
+    PATTERNS.forEach((p, i) => {
+        const sw = document.createElement('button');
+        sw.type = 'button';
+        sw.title = p.name;
+        const svgPrev = p.fn('#5C4030');
+        const b64Prev = btoa(unescape(encodeURIComponent(svgPrev)));
+        const enc = 'url(data:image/svg+xml;base64,' + b64Prev + ')';
+        sw.style.cssText = 'width:22px;height:22px;border-radius:3px;border:2px solid '+(i===0?'white':'rgba(255,255,255,.3)')+';cursor:pointer;overflow:hidden;flex-shrink:0;transition:all .18s;background-color:#FAF7F2;background-image:'+enc+';background-size:'+p.size+';padding:0;';
+        sw.addEventListener('click', () => applyPattern(i));
+        picker.appendChild(sw);
+        sw.dataset.pi = i;
+    });
+}
+
+function refreshPatternSwatches() {
+    document.querySelectorAll('[data-pi]').forEach(sw => {
+        const i = parseInt(sw.dataset.pi);
+        sw.style.borderColor = i===currentPatternIdx ? 'white' : 'rgba(255,255,255,.3)';
+        sw.style.transform = i===currentPatternIdx ? 'scale(1.2)' : 'scale(1)';
+    });
+}
+
+/* ═══════════════════════════════════════════
+   四張圖卡編輯器
+═══════════════════════════════════════════ */
+let ceDay = null;
+let ceTab = 0;
+
+const CE_TABS = [
+    { label:'P1 封面',  fields:['word_ruby','word_plain','m_s'],
+      labels:['詞彙（含 ruby 標注）','詞彙（純文字）','短義'],
+      hints:['格式：&lt;ruby&gt;漢字&lt;rt&gt;假名&lt;/rt&gt;&lt;/ruby&gt;','顯示於卡片右側資訊欄','顯示在大字下方的意思'] },
+    { label:'P2 解析',  fields:['m_l'],
+      labels:['語感解析詳文'],
+      hints:['說明語感、使用場景、注意事項（可分段）'] },
+    { label:'P3 例句①', fields:['e1_jp','e1_zh'],
+      labels:['例句①（日文）','例句①（中文翻譯）'],
+      hints:['支援 ruby 標注',''] },
+    { label:'P4 例句②', fields:['e2_jp','e2_zh'],
+      labels:['例句②（日文）','例句②（中文翻譯）'],
+      hints:['支援 ruby 標注',''] },
+];
+
+function openCardEditor(day) {
+    ceDay = day; ceTab = 0;
+    const d = monthData.find(x => x.d === day);
+    document.getElementById('ceTitle').textContent = '✦ Day '+String(day).padStart(2,'0')+'「'+d.word_plain+'」圖卡預覽與編輯';
+    document.getElementById('cardEditorOverlay').style.cssText = '--ce-accent:'+getThemeColor()+';display:flex;';
+    document.getElementById('cardEditorOverlay').classList.add('open');
+    CE_TABS.forEach((_,i) => {
+        const t = document.getElementById('ceTab'+i);
+        t.classList.toggle('active', i===0);
+        t.style.background = i===0 ? getThemeColor() : '';
+        t.style.color = i===0 ? 'white' : '#9A8E83';
+    });
+    // 初始化字體大小 labels
+    updateCeSizeLabels();
+    // 建立紋様選擇器（在圖卡編輯器內）
+    buildCePatPicker();
+    ceRenderFields();
+    ceRenderPreview();
+}
+
+function buildCePatPicker() {
+    const container = document.getElementById('cePatPicker');
+    if (!container) return;
+    container.innerHTML = '';
+    PATTERNS.forEach((p, i) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.title = p.name;
+        const svgPrev = p.fn('#5C4030');
+        const b64Ce = btoa(unescape(encodeURIComponent(svgPrev)));
+        const enc = 'url(data:image/svg+xml;base64,' + b64Ce + ')';
+        btn.style.cssText = 'width:28px;height:28px;border-radius:4px;border:2px solid '
+            +(i===currentPatternIdx?getThemeColor():'#ccc')
+            +';cursor:pointer;overflow:hidden;flex-shrink:0;transition:all .18s;'
+            +'background-color:#FAF7F2;background-image:'+enc+';background-size:'+p.size+';padding:0;';
+        btn.dataset.cpi = i;
+        btn.addEventListener('click', () => {
+            currentPatternIdx = i;
+            refreshPatternSwatches();
+            buildCePatPicker(); // rebuild to update borders
+            renderFeed();
+            ceRenderPreview();
+        });
+        container.appendChild(btn);
+    });
+}
+
+function closeCardEditor() {
+    ceSaveCurrentTab();
+    document.getElementById('cardEditorOverlay').classList.remove('open');
+    document.getElementById('cardEditorOverlay').style.display = 'none';
+}
+
+function ceSaveAndClose() {
+    ceSaveCurrentTab(); persist(); renderFeed(); closeCardEditor(); showToast('✅ 已儲存');
+}
+
+function ceSwitchTab(idx) {
+    ceSaveCurrentTab();
+    ceTab = idx;
+    CE_TABS.forEach((_,i) => {
+        const t = document.getElementById('ceTab'+i);
+        t.classList.toggle('active', i===idx);
+        t.style.background = i===idx ? getThemeColor() : '';
+        t.style.color = i===idx ? 'white' : '#9A8E83';
+    });
+    // refresh size labels
+    updateCeSizeLabels();
+    ceRenderFields();
+    ceRenderPreview();
+}
+
+function ceSaveCurrentTab() {
+    if (ceDay===null) return;
+    const d = monthData.find(x => x.d===ceDay);
+    CE_TABS[ceTab].fields.forEach(f => { const el=document.getElementById('ce_'+f); if(el) d[f]=el.value; });
+}
+
+function ceRenderFields() {
+    const d = monthData.find(x => x.d===ceDay);
+    const tab = CE_TABS[ceTab];
+    const col = document.getElementById('ceEditFields');
+    col.innerHTML = '';
+    tab.fields.forEach((f, i) => {
+        const rows = f==='m_l'?7 : (f.endsWith('_jp')||f.endsWith('_zh'))?3 : 2;
+        const div = document.createElement('div'); div.className='ce-field';
+        div.innerHTML = '<label class="ce-label">'+tab.labels[i]+'</label>'
+            +'<textarea id="ce_'+f+'" class="ce-input" rows="'+rows+'" oninput="ceRenderPreview()">'+(d[f]||'')+'</textarea>'
+            +(tab.hints[i]?'<div class="ce-hint">'+tab.hints[i]+'</div>':'');
+        col.appendChild(div);
+    });
+    // Add char counter for m_s / m_l
+    if (tab.fields.includes('m_s') || tab.fields.includes('m_l')) {
+        const note = document.createElement('div');
+        note.style.cssText = 'font-size:11px;color:#9CA3AF;text-align:right;';
+        note.textContent = '修改後即時反映於左側預覽';
+        col.appendChild(note);
+    }
+}
+
+function ceLiveData() {
+    const d = {}; Object.assign(d, monthData.find(x=>x.d===ceDay));
+    CE_TABS[ceTab].fields.forEach(f => { const el=document.getElementById('ce_'+f); if(el) d[f]=el.value; });
+    return d;
+}
+
+function ceGetLayoutHTML(d, tabIdx) {
+    const color = getThemeColor();
+    const [ms, rs] = tabFontSizes[tabIdx];
+    const rtVar = "--rt-px:"+rs+"px;";
+    return [
+        '<div class="cover-body rt-sized" style="'+rtVar+'"><div class="cover-title" style="font-size:'+ms+'px;">'+parseRuby(d.word_ruby)+'</div><div class="cover-desc">'+d.m_s+'</div></div>',
+        '<div class="cover-body rt-sized" style="padding:0 25px;'+rtVar+'"><div class="example-box" style="border:none;text-align:center;"><div style="font-weight:900;color:'+color+';margin-bottom:8px;font-size:13px;">意思</div><div style="font-size:'+ms+'px;line-height:2.2;">'+parseRuby(d.m_l)+'</div></div></div>',
+        '<div class="cover-body rt-sized" style="padding:0 20px;'+rtVar+'"><div class="example-box"><div class="example-jp" style="font-size:'+ms+'px;line-height:2.6;">'+parseRuby(d.e1_jp)+'</div><div style="margin-top:8px;font-size:'+Math.round(ms*0.55)+'px;color:#666;">'+d.e1_zh+'</div></div></div>',
+        '<div class="cover-body rt-sized" style="padding:0 20px;'+rtVar+'"><div class="example-box"><div class="example-jp" style="font-size:'+ms+'px;line-height:2.6;">'+parseRuby(d.e2_jp)+'</div><div style="margin-top:8px;font-size:'+Math.round(ms*0.55)+'px;color:#666;">'+d.e2_zh+'</div></div></div>'
+    ][tabIdx];
+}
+
+function ceRenderPreview() {
+    const d = ceLiveData();
+    const { image, size, opacity } = buildPatternBg(currentPatternIdx);
+    const color = getThemeColor();
+    document.getElementById('cePreviewWrap').innerHTML =
+        '<div class="ig-card" style="--kori-primary:'+color+';background:'+getThemeBg()+';color:'+getThemeText()+';width:340px;height:340px;">'
+        +'<div class="card-pattern" style="background-image:'+image+';background-size:'+size+';opacity:'+opacity+';"></div>'
+        +'<div class="card-header">'
+        +'<div style="font-size:11px;font-weight:bold;opacity:.6;">小狸日語</div></div>'
+        +ceGetLayoutHTML(d, ceTab)
+        +'</div>';
+}
+
+async function ceDownloadCurrent() {
+    ceSaveCurrentTab(); persist();
+    const zone = document.getElementById('offscreen-render-zone');
+    const d = monthData.find(x=>x.d===ceDay);
+    const { image:pi, size:ps, opacity:po } = buildPatternBg(currentPatternIdx);
+    const color = getThemeColor(); const SCALE = 1080/380;
+    zone.innerHTML = '<div class="ig-card" style="--kori-primary:'+color+';background:'+getThemeBg()+';color:'+getThemeText()+';width:380px;height:380px;border-radius:0;">'
+        +'<div class="card-pattern" style="background-image:'+pi+';background-size:'+ps+';opacity:'+po+';"></div>'
+        +'<div class="card-header">'
+        +'<div style="font-size:11px;font-weight:bold;opacity:.6;">小狸日語</div></div>'
+        +ceGetLayoutHTML(d, ceTab)+'</div>';
+    const card = zone.firstElementChild;
+    try {
+        const canvas = await html2canvas(card, { scale:SCALE, useCORS:true, backgroundColor:getThemeBg(), logging:false, allowTaint:true });
+        const out = document.createElement('canvas'); out.width=1080; out.height=1080;
+        const ctx2 = out.getContext('2d');
+        ctx2.fillStyle=getThemeBg(); ctx2.fillRect(0,0,1080,1080);
+        ctx2.drawImage(canvas,0,0,1080,1080);
+        const link=document.createElement('a'); link.download='小狸日語_'+(monthData.find(x=>x.d===ceDay)||{}).word_plain+'_P'+(ceTab+1)+'.jpg';
+        link.href=out.toDataURL('image/jpeg',.95); link.click();
+        showToast('✅ P'+(ceTab+1)+' 下載完成');
+    } catch(e) { console.error(e); }
+    zone.innerHTML='';
+}
+
+async function ceDownloadAll() {
+    ceSaveCurrentTab(); persist();
+    const btn = document.querySelector('#cardEditorOverlay .ce-footer .btn-primary:last-child');
+    await downloadAllFour(ceDay, btn);
+}
+
+/* ═══════════════════════════════════════════
+   Init
+═══════════════════════════════════════════ */
+window.onload = function() {
+    loadApiKey();
+    loadSnsTemplate();
+    applyExSize();
+    initPatternPicker();
+    renderFeed();
+    // 清除全部資料按鈕
+    document.getElementById('resetBtn').onclick = function() {
+        if (confirm('確定清除所有資料？此操作不可復原。')) {
+            localStorage.removeItem('kori_data');
+            location.reload();
+        }
+    };
+};
+</script>
+</body>
+</html>
